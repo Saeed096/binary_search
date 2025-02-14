@@ -7,8 +7,11 @@ namespace binary_search
 {
     internal class Program
     {
+        //private static Random random = new Random();
         static void Main(string[] args)
         {
+            //random.Next(1, 6);
+            
             Console.WriteLine("Hello, World!");
 
             //int[] temp = { 1 };
@@ -39,7 +42,8 @@ namespace binary_search
 
             Merge(new int[] {1,2,3,0,0,0} , 3 , new int[] { 2, 5, 6}, 3);
 
-            int[] result = SortArray2(new int[] {5,2,3,1 });
+           
+            int[] result = SortArray2([-74, -74 , -74 , -74]);
 
             foreach(int num in result)
             {
@@ -879,60 +883,55 @@ namespace binary_search
 
         public static int[] SortArray2(int[] nums)  // to be revised // quick sort algorithm, check O(????) >> should be O(n(log n)) >> on quick sort all items will be checked for number of log(n) if the whole array is 8 elements >> will check the 8 to divide to 4 and 4 as example , then check the 4 to divde into 2 and 2 and the other 4 also so the whole 8 were checked again , finaly each 2 will be checked to detect swapping will happen or not so the whole 8 elements were checked again, that means we touched the whole array 3 times which is log(8) so O(n(log n)) 
         {
-            if (nums.Length == 0)
-            {
-                return new int[0];
-            }
-
-            else if (nums.Length == 1)
+            if (nums.Length == 1)
             {
                 return nums;
             }
 
-            else if (nums.Length == 2)
-            {
-                if (nums[0] <= nums[1])
-                {
-                    return nums;
-                }
-                swap(nums, 0 , 1);
-                return nums;
-            }
-
+           
             else
             {
-                int pivot = nums[0];
-                int pivotIndex = 0;
-                //List<int> smallerThanPivot = new List<int>();
-                //List<int> largerThanPivot = new List<int>();
+                int pivotIndex = medianOfThreePivot(nums, 0 , nums.Length - 1);
+                int pivot = nums[pivotIndex];
+                int partitioningIndex = 0;
 
-                for (int i = 1; i < nums.Length; i++)
+
+                // move pivot to last index
+                swap(nums, pivotIndex, nums.Length - 1);
+                pivotIndex = nums.Length - 1;
+
+                for(int i = 0; i < nums.Length - 1; i++)  // lomuto partitioning scheme 
                 {
-                    if (nums[i] < pivot)
+                    if (nums[i] < pivot)  // on using < so if num = pivot swapping will not happen , meaning that after pivot index is swapped with partition index equals nums will be after new pivot index , on sending smallerThanPivot arr to be sorted infinite loop will not happen , on the other hand if use <= if num = pivot swapping will happen , meaning that after pivot index is swapped with partition index equals nums will be before new pivot index , on sending smallerThanPivot arr to be sorted u should send to the index of pivot - 1 not the pivot index itself to avoid infinite loops
                     {
-                        for(int y = i; y > pivotIndex; y--)  // to be tested , if num < pivot , swap pivot with this num and update pivot index with i without the nested loop , start iterating from the end to start
-                        {
-                            swap(nums, y, y - 1);
-                        }
-                        pivotIndex++;
+                        swap(nums , i , partitioningIndex);
+                        partitioningIndex++;
                     }
                 }
-                SortArray2(nums[..pivotIndex]);
-                SortArray2(nums[(pivotIndex+1)..]);
-                 // here concat parts of arr together
-            
+                // moving pivot to its suitable index in the array
+                swap(nums, pivotIndex, partitioningIndex);
+                pivotIndex = partitioningIndex;
+
+
+                //int[] smallerThanPivotArr = SortArray2(nums[..pivotIndex]);
+                //int[] largerThanPivotArr = SortArray2(nums[(pivotIndex + 1)..]);
+
+                partition(nums, 0, pivotIndex);  
+                partition(nums, pivotIndex + 1, nums.Length - 1);
+                // here concat parts of arr together
+
 
                 //int[] sortedArray = new int[nums.Length];
-                //for(int i = 0; i<smallerThanPivotArray.Length; i++)
+                //for (int i = 0; i < smallerThanPivotArr.Length; i++)
                 //{
-                //    sortedArray[i] = smallerThanPivotArray[i];
+                //    sortedArray[i] = smallerThanPivotArr[i];
                 //}
 
-                //sortedArray[smallerThanPivotArray.Length] = pivot;
+                //sortedArray[smallerThanPivotArr.Length] = pivot;
 
-                //for (int i = 0; i < largerThanPivotArray.Length; i++)
+                //for (int i = 0; i < largerThanPivotArr.Length; i++)
                 //{
-                //    sortedArray[i + smallerThanPivotArray.Length + 1] = largerThanPivotArray[i];
+                //    sortedArray[i + smallerThanPivotArr.Length + 1] = largerThanPivotArr[i];
                 //}
 
                 return nums;
@@ -949,7 +948,66 @@ namespace binary_search
             nums[secondIndex] = temp;
         }
 
+        public static void partition(int[] nums, int firstIndex, int secondIndex)
+        {
+            if(secondIndex - firstIndex == 0)
+            {
+                return;
+            }
+
+            int pivotIndex = medianOfThreePivot(nums , firstIndex , secondIndex);
+            int pivot = nums[pivotIndex];
+            int partitioningIndex = firstIndex;
+
+            swap(nums, pivotIndex, secondIndex);
+            pivotIndex = secondIndex;
+
+            for (int i = firstIndex; i < secondIndex; i++)  // lomuto partitioning scheme , iterate over pivot index also , as pivot = pivot which means swapping will happen & incrementing partitioning index will happen as well
+            {
+                if (nums[i] < pivot)
+                {
+                    swap(nums, i, partitioningIndex);
+                    partitioningIndex++;
+                }
+            }
+            // moving pivot to its suitable index in the array
+            swap(nums, pivotIndex, partitioningIndex);
+            pivotIndex = partitioningIndex;
 
 
-    }
+            partition(nums, firstIndex, pivotIndex);  //// arrange part of smaller values array , scale should be smaller each recursion
+            partition(nums, pivotIndex + 1, secondIndex); //// arrange part of larger values array
+
+            return;
+
+        }
+
+
+        public static int medianOfThreePivot(int[] nums, int firstIndex , int secondIndex) // choosing good pivot affects time and space complexity significantly as if I selected pivot lead to unbalanced sub arrays , so no smaller elements than pivot , all are lager for example which means I will check the whole array in this recursion call stack to get only one new element arranged in its proper index "for sure it will be element from the larger than pivot sub array" as the smaller sub array is empty, but in case of good pivot and balanced sub arrays , checking all elements will results in getting 2 new elements in their proper position , 1 from the smaller than pivot sub array and the other from larger than pivot subarray , which significantly reduce recursion call stack from O(n) to O(log(n)) "space complexity" and as each recursion I check all elements in the array so the time complexity will be reduced from O(n2) to O(n(log n))
+        {
+            int left = firstIndex;
+            int right = secondIndex;
+            int mid = (left + right) / 2;
+
+            // arrange to guarantee the mid index has the median of 3 value
+
+            if (nums[left] > nums[mid]) 
+            {
+                swap(nums , left , mid);
+            }
+
+            if (nums[left] > nums[right])
+            {
+                swap(nums, left, right);
+            }
+
+            if (nums[mid] > nums[right])
+            {
+                swap(nums, mid, right);
+            }
+
+            return mid;  // that index contains the median value , for sure there is a one value at least larger than it and 1 at least smaller , helps in avoiding the worst case on selecting the pivot
+        }
+
+        }
 }
