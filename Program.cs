@@ -40,15 +40,21 @@ namespace binary_search
 
             //PeakIndexInMountainArray(new int []{ 18, 29, 38, 59, 98, 100, 99, 98, 90 });
 
-            Merge(new int[] {1,2,3,0,0,0} , 3 , new int[] { 2, 5, 6}, 3);
+            //Merge(new int[] {1,2,3,0,0,0} , 3 , new int[] { 2, 5, 6}, 3);
 
-           
-            int[] result = SortArray2([-74, -74 , -74 , -74]);
 
-            foreach(int num in result)
-            {
-                Console.WriteLine(num);
-            }
+            //int[] result = SortArray2([-74, -74 , -74 , -74]);
+
+            //foreach(int num in result)
+            //{
+            //    Console.WriteLine(num);
+            //}
+            
+            ListNode node3 = new ListNode(val: -1, next: null);
+            ListNode node2 = new ListNode(val: 0, next:node3);
+            ListNode node = new ListNode(val: 2, next: node2);
+
+            Console.WriteLine(InsertionSortList(node));
         }
 
         // no 1
@@ -1009,5 +1015,63 @@ namespace binary_search
             return mid;  // that index contains the median value , for sure there is a one value at least larger than it and 1 at least smaller , helps in avoiding the worst case on selecting the pivot
         }
 
+
+
+        // 147 leetcode
+        public static ListNode InsertionSortList(ListNode head)
+        {
+            ListNode firstHead = head;
+            bool isSorted = true;
+            bool firstIteration = true;
+
+            while (!isSorted || firstIteration)  // that cause one extra iteration that no swaps will happen inside it , its benefit that issorted flag will be true so break the while , try to get rid of this overhead
+            {
+                firstIteration = false;
+                isSorted = true;
+
+                while (head != null)
+                {
+
+                    // start new iteration if not sorted yet
+                    //if(head is null)
+                    //{
+                    //    head = firstHead;
+                    //}
+
+
+                    //ListNode tempNode = head;
+
+                    if (head.next?.val < head.val)
+                    {
+                        swapNodes(head);
+                        isSorted = false;
+                    }
+
+                    head = head.next;
+                }
+
+                head = firstHead;
+
+            }
+
+            return firstHead; 
+
+
         }
+
+        private static void swapNodes(ListNode node)
+        {
+            if(node?.val == null || node.next == null)
+            {
+                return;
+            }
+
+            int temp = node.val;
+            node.val = node.next.val;
+            node.next.val = temp;
+
+            
+
+        }
+    }
 }
